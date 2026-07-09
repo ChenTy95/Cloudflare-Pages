@@ -181,8 +181,11 @@ body {
 
 /* ===== Footer ===== */
 .footer {
+  margin-top: 16px;
   font-size: 0.68rem;
   color: var(--text-muted);
+  text-align: center;
+  line-height: 1.8;
   letter-spacing: 0.3px;
 }
 
@@ -208,7 +211,7 @@ body {
 
   <div class="name">ChenTy95</div>
 
-  <div class="bio">搞搞网络，写写代码。</div>
+  <div class="bio">搞搞网络，写写代码</div>
 
   <div class="divider"></div>
 
@@ -235,12 +238,14 @@ body {
     <!-- ↓ 后续新页面卡片加在这里 ↓ -->
   </div>
 
-  <div class="footer" id="footer-year"></div>
+  <div class="footer">
+    <div>基于 Claude Code &amp; DeepSeek 构建</div>
+    <div>© <span id="footer-year"></span> ChenTy95</div>
+  </div>
 </div>
 
 <script>
-document.getElementById('footer-year').textContent =
-  '© ' + new Date().getFullYear() + ' ChenTy95';
+document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
 
 </body>
