@@ -1,0 +1,148 @@
+body {
+	font-size: 0px;
+}
+
+.ResDiv {
+	width: 100%;
+	margin: 0 auto;
+	text-align: center;
+}
+
+@media screen and (min-width: 550px) {
+	.ResDiv { width: 550px; }
+
+}
+
+button {
+	pointer-events: none;
+	border: 2px solid;
+	font-family: "Microsoft Yahei","微软雅黑","Helvetica","sans-serif";
+	background-color: #C7F2E7;
+}
+
+.topic {
+	width: 100%;
+	height: 50px;
+	font-size: 20px;
+	border-color: #011935;
+	background-color: #305496;
+	color: #FFF;
+	line-height: 50px;
+	margin-top: 5px;
+}
+
+.label25p {
+	width: 25%;
+	height: 40px;
+	font-size: 16px;
+	float: right;
+	margin-left: 5px;
+	margin-top: 10px;
+	padding: 0px;
+	background-color: #305496;
+	border-color: #011935;
+	color: #FFF;
+}
+
+.width25p {
+	width: 25%;
+	height: 40px;
+	font-size: 16px;
+	float: right;
+	margin-left: 5px;
+	margin-top: 10px;
+	padding: 0px;
+	background-color: #C7F2E7;
+	border-color: #011935;
+	pointer-events: auto;
+	color: #011935;
+}
+
+.width25pFocus {
+	width: 25%;
+	height: 40px;
+	font-size: 16px;
+	float: right;
+	margin-left: 5px;
+	margin-top: 10px;
+	padding: 0px;
+	background-color: #F0E68C;
+	border-color: #FF8C00;
+	pointer-events: auto;
+	color: #8B4513;
+}
+
+.label20p {
+	width: 20%;
+	height: 40px;
+	font-size: 16px;
+	float: left;
+	margin-top: 10px;
+	padding: 0px;
+	background-color: #305496;
+	color: #FFF;
+	border-color: #011935;
+}
+
+.numpad .numbtn,.numbtnRight,.numbtnBottom {
+	width: 33%;
+	height: 45px;
+	border-right: 0px;
+	border-bottom: 0px;
+	margin: 0px 0px;
+	font-size: 22px;
+	line-height: 22px;
+	float: left;
+	pointer-events: auto;
+	background-color: #FFEFBF;
+	border-color: #CC044D;
+	color: #7A023C;
+	font-weight: bold;
+}
+
+.numbtnRight {
+	border-right: 2px solid #CC044D;
+}
+
+.numbtnBottom {
+	border-bottom: 2px solid #CC044D;
+}
+
+.numpad {
+	float: left;
+	width: 60%;
+	margin-top: 20px;
+}
+
+.arrowpad {
+	float: left;
+	width: 30%;
+	margin-top: 20px;
+	margin-left: 5%;
+}
+
+.arrowbtn {
+	width: 30%;
+	height: 30px;
+	background-color: #C0C0C0;
+	padding: 0px;
+	pointer-events: auto;
+}
+
+.ctrlpad {
+	float: left;
+	width: 34%;
+	margin-top: 20px;
+	margin-left: 3%;
+}
+
+.ctrlbtn {
+	width: 45%;
+	height: 32px;
+	background-color: #FFEFBF;
+	border-color: #CC044D;
+	padding: 0px;
+	margin-bottom: 6px;
+	pointer-events: auto;
+	font-size: 14px;
+}
