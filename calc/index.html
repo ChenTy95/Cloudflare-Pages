@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>价格比对工具</title>
+<style>
+/* ===== CSS Variables ===== */
+:root {
+  --bg-page: linear-gradient(135deg, #f7f3ed 0%, #eee7dc 40%, #e8dfd3 100%);
+  --card-bg: #fffdf9;
+  --card-shadow: 0 2px 20px rgba(0,0,0,0.07), 0 8px 40px rgba(0,0,0,0.05);
+  --text-primary: #2d2a26;
+  --text-secondary: #7a7368;
+  --text-muted: #b0a89c;
+  --accent: #e8813b;
+  --accent-subtle: #fff2e8;
+  --accent-border: #f0c9a8;
+  --cell-bg: #f7f4ef;
+  --cell-focus-bg: #fff6ed;
+  --cell-focus-border: #e8813b;
+  --cell-focus-shadow: 0 0 0 3px rgba(232,129,59,0.18), 0 0 20px rgba(232,129,59,0.12);
+  --cell-border: #e6e1d9;
+  --cheapest-color: #228b4f;
+  --cheapest-bg: #e5f5ec;
+  --cheapest-shadow: 0 0 0 3px rgba(34,139,79,0.15);
+  --danger: #d94838;
+  --numpad-btn-bg: #f0ece7;
+  --numpad-btn-active: #e6dfd7;
+  --header-accent: #d9895c;
+  --header-accent-bg: #fef8f3;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-btn: 10px;
+  --font-stack: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", system-ui, -apple-system, sans-serif;
+  --transition-fast: 0.12s ease;
+  --transition-smooth: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-stack);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 12px 8px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+#app-root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===== App Wrapper ===== */
+.app-wrapper {
+  width: 100%;
+  max-width: 480px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  padding: 16px 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Header ===== */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.app-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.col-controls {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.col-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--cell-border);
+  background: var(--numpad-btn-bg);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.col-btn:active {
+  transform: scale(0.9);
+  background: var(--numpad-btn-active);
+}
+
+.col-btn.remove { color: var(--danger); }
+
+/* ===== Price Grid ===== */
+.price-grid {
+  display: grid;
+  grid-template-columns: 68px repeat(var(--col-count, 3), 1fr);
+  gap: 5px;
+}
+
+/* Row label */
+.cell-label {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+}
+
+/* Column header (规格1, 规格2...) */
+.cell-header {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--header-accent);
+  background: var(--header-accent-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent-border);
+}
+
+/* Editable data cell */
+.cell-data {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 500;
+  background: var(--cell-bg);
+  border: 1.5px solid var(--cell-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  position: relative;
+  color: var(--text-primary);
+  font-family: var(--font-stack);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cell-data:active {
+  transform: scale(0.95);
+  background: var(--numpad-btn-active);
+}
+
+.cell-data.cell-focused {
+  background: var(--cell-focus-bg);
+  border-color: var(--cell-focus-border);
+  box-shadow: var(--cell-focus-shadow);
+  z-index: 1;
+  animation: focusBreath 2.4s ease-in-out infinite;
+}
+
+@keyframes focusBreath {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(232,129,59,0.12), 0 0 18px rgba(232,129,59,0.08); }
+  50%      { box-shadow: 0 0 0 3px rgba(232,129,59,0.24), 0 0 24px rgba(232,129,59,0.15); }
+}
+
+/* Result cells (单价 / 选哪个) — same font-size as cell-data */
+.cell-result {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  border-radius: var(--radius-sm);
+}
+
+.cell-choice {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-smooth);
+}
+
+/* Cheapest column highlight */
+.cell-cheapest {
+  color: var(--cheapest-color) !important;
+  background: var(--cheapest-bg) !important;
+  box-shadow: var(--cheapest-shadow);
+}
+
+.cell-cheapest .check-icon {
+  font-size: 1.5rem;
+  color: var(--cheapest-color);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ===== Bottom Panel ===== */
+.bottom-panel {
+  display: flex;
+  gap: 12px;
+}
+
+/* ===== Numpad ===== */
+.numpad {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.num-btn {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: var(--numpad-btn-bg);
+  border: 1.5px solid var(--cell-border);
+  border-radius: var(--radius-btn);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-stack);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.num-btn:active {
+  transform: scale(0.91);
+  background: var(--numpad-btn-active);
+  border-color: var(--accent-border);
+  transition: transform 0.06s ease;
+}
+
+.num-btn.backspace {
+  font-size: 1rem;
+  color: var(--danger);
+  font-weight: 400;
+}
+
+/* ===== Action Side ===== */
+.action-side {
+  flex: 0 0 auto;
+  width: 28%;
+  min-width: 88px;
+  max-width: 125px;
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-btn {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--numpad-btn-bg);
+  border: 1.5px solid var(--cell-border);
+  border-radius: var(--radius-btn);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-stack);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0 4px;
+}
+
+.action-btn:active {
+  transform: scale(0.93);
+  background: var(--numpad-btn-active);
+  border-color: var(--accent-border);
+}
+
+.action-btn.danger {
+  color: var(--danger);
+}
+
+/* ===== Footer ===== */
+.app-footer {
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  padding-top: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 370px) {
+  .app-wrapper { padding: 10px 6px 12px; gap: 8px; }
+  .price-grid { grid-template-columns: 58px repeat(var(--col-count, 3), 1fr); gap: 4px; }
+  .cell-label { font-size: 0.68rem; height: 38px; }
+  .cell-header { font-size: 0.63rem; height: 30px; }
+  .cell-data  { font-size: 0.85rem; height: 38px; }
+  .cell-result, .cell-choice { height: 38px; font-size: 0.85rem; }
+  .num-btn { height: 40px; font-size: 1.05rem; }
+  .action-side { width: 27%; min-width: 72px; max-width: 105px; }
+  .action-btn { height: 40px; font-size: 0.68rem; gap: 4px; }
+  .bottom-panel { gap: 8px; }
+  .app-title { font-size: 0.95rem; }
+  .col-btn { width: 30px; height: 30px; font-size: 1rem; }
+}
+
+@media (max-width: 320px) {
+  body { padding: 4px 2px; }
+  .app-wrapper { padding: 6px 4px 8px; gap: 6px; }
+  .price-grid { grid-template-columns: 48px repeat(var(--col-count, 3), 1fr); gap: 3px; }
+  .cell-label { font-size: 0.6rem; height: 32px; }
+  .cell-header { font-size: 0.56rem; height: 26px; }
+  .cell-data  { font-size: 0.75rem; height: 32px; }
+  .cell-result, .cell-choice { height: 32px; font-size: 0.75rem; }
+  .num-btn { height: 34px; font-size: 0.95rem; }
+  .action-side { width: 27%; min-width: 64px; max-width: 90px; }
+  .action-btn { height: 34px; font-size: 0.6rem; gap: 3px; }
+  .bottom-panel { gap: 6px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app-root"></div>
+
+<script>
+/* =================================================================
+   PriceCalcEngine — 纯数据模型，零 DOM 依赖
+   ================================================================= */
+class PriceCalcEngine {
+  constructor(initialCols = 3) {
+    this.columns = [];
+    this.MAX_COLS = 8;
+    this.MIN_COLS = 2;
+    for (let i = 0; i < initialCols; i++) {
+      this.addColumn();
+    }
+  }
+
+  addColumn() {
+    if (this.columns.length >= this.MAX_COLS) return false;
+    this.columns.push({ quantity: '', price: '' });
+    this._recalculate();
+    return true;
+  }
+
+  removeColumn() {
+    if (this.columns.length <= this.MIN_COLS) return false;
+    this.columns.pop();
+    this._recalculate();
+    return true;
+  }
+
+  removeColumnAt(index) {
+    if (this.columns.length <= this.MIN_COLS) return false;
+    if (index < 0 || index >= this.columns.length) return false;
+    this.columns.splice(index, 1);
+    this._recalculate();
+    return true;
+  }
+
+  setCellValue(colIndex, field, value) {
+    if (colIndex < 0 || colIndex >= this.columns.length) return false;
+    if (value !== '' && !/^\d*\.?\d*$/.test(value)) return false;
+    if (value.replace('.','').length > 10) return false;
+    this.columns[colIndex][field] = value;
+    this._recalculate();
+    return true;
+  }
+
+  clearCell(colIndex, field) {
+    if (colIndex < 0 || colIndex >= this.columns.length) return;
+    this.columns[colIndex][field] = '';
+    this._recalculate();
+  }
+
+  clearColumn(colIndex) {
+    if (colIndex < 0 || colIndex >= this.columns.length) return;
+    this.columns[colIndex].quantity = '';
+    this.columns[colIndex].price = '';
+    this._recalculate();
+  }
+
+  clearAll() {
+    for (const col of this.columns) {
+      col.quantity = '';
+      col.price = '';
+    }
+    this._recalculate();
+  }
+
+  _recalculate() {
+    let cheapestVal = Infinity;
+
+    for (let i = 0; i < this.columns.length; i++) {
+      const col = this.columns[i];
+      const q = parseFloat(col.quantity);
+      const p = parseFloat(col.price);
+
+      if (!isNaN(q) && !isNaN(p) && q > 0) {
+        col._unitPrice = p / q;
+        if (col._unitPrice < cheapestVal) {
+          cheapestVal = col._unitPrice;
+        }
+      } else {
+        col._unitPrice = null;
+      }
+    }
+
+    // 标记所有与最低价相同的列（处理并列情况）
+    for (let i = 0; i < this.columns.length; i++) {
+      const col = this.columns[i];
+      col._isCheapest = (
+        col._unitPrice !== null &&
+        col._unitPrice.toFixed(8) === cheapestVal.toFixed(8) &&
+        this.columns.length > 1
+      );
+    }
+  }
+
+  getState() {
+    return {
+      columns: this.columns.map((col, i) => ({
+        index: i,
+        quantity: col.quantity,
+        price: col.price,
+        unitPrice: col._unitPrice ?? null,
+        isCheapest: col._isCheapest ?? false,
+      })),
+      colCount: this.columns.length,
+    };
+  }
+
+  canAdd() { return this.columns.length < this.MAX_COLS; }
+  canRemove() { return this.columns.length > this.MIN_COLS; }
+}
+
+/* =================================================================
+   PriceCalcUI — DOM 构建 + 事件 + 渲染
+   ================================================================= */
+class PriceCalcUI {
+  constructor(engine, container) {
+    this.engine = engine;
+    this.container = container;
+    this.focusedCell = { col: 0, field: 'quantity' };
+
+    this._buildDOM();
+    this._bindEvents();
+    this.render();
+  }
+
+  /* ---------- 一次性构建静态 DOM ---------- */
+  _buildDOM() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'app-wrapper';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'app-header';
+    const title = document.createElement('span');
+    title.className = 'app-title';
+    title.textContent = '价格比对工具';
+    const colCtrls = document.createElement('div');
+    colCtrls.className = 'col-controls';
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'col-btn add';
+    btnAdd.dataset.action = 'addCol';
+    btnAdd.textContent = '+';
+    const btnRemove = document.createElement('button');
+    btnRemove.className = 'col-btn remove';
+    btnRemove.dataset.action = 'removeCol';
+    btnRemove.textContent = '−';
+    colCtrls.appendChild(btnAdd);
+    colCtrls.appendChild(btnRemove);
+    header.appendChild(title);
+    header.appendChild(colCtrls);
+
+    // Price grid
+    const grid = document.createElement('div');
+    grid.className = 'price-grid';
+    grid.id = 'priceGrid';
+
+    // Bottom panel
+    const bottom = document.createElement('div');
+    bottom.className = 'bottom-panel';
+
+    // Numpad — 0 at bottom-left, . in middle, backspace at right
+    const numpad = document.createElement('div');
+    numpad.className = 'numpad';
+    const keys = ['1','2','3','4','5','6','7','8','9','0','.','bk'];
+    for (const k of keys) {
+      const btn = document.createElement('button');
+      btn.className = 'num-btn' + (k === 'bk' ? ' backspace' : '');
+      btn.dataset.action = 'numpad';
+      btn.dataset.key = k;
+      btn.textContent = k === 'bk' ? '⌫' : k;
+      numpad.appendChild(btn);
+    }
+
+    // Action side — 3 vertical buttons
+    const side = document.createElement('div');
+    side.className = 'action-side';
+    const actions = [
+      { op:'reInput',   text:'清空当前',   cls:'action-btn' },
+      { op:'clearSpec', text:'清空规格',   cls:'action-btn danger' },
+      { op:'clearAll',  text:'全部清空',   cls:'action-btn' },
+    ];
+    for (const a of actions) {
+      const btn = document.createElement('button');
+      btn.className = a.cls;
+      btn.dataset.action = 'ctrl';
+      btn.dataset.op = a.op;
+      btn.textContent = a.text;
+      side.appendChild(btn);
+    }
+
+    bottom.appendChild(numpad);
+    bottom.appendChild(side);
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.className = 'app-footer';
+    footer.textContent = `© ${new Date().getFullYear()} ChenTy95`;
+    wrapper.appendChild(header);
+    wrapper.appendChild(grid);
+    wrapper.appendChild(bottom);
+    wrapper.appendChild(footer);
+    this.container.appendChild(wrapper);
+  }
+
+  /* ---------- 事件委托 ---------- */
+  _bindEvents() {
+    this.container.addEventListener('touchend', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('gesturestart', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    this.container.addEventListener('pointerdown', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      e.preventDefault();
+      this._dispatch(btn.dataset);
+    });
+  }
+
+  /* ---------- 动作分发 ---------- */
+  _dispatch(ds) {
+    switch (ds.action) {
+      case 'numpad':    this._handleNumpad(ds.key); break;
+      case 'ctrl':      this._handleCtrl(ds.op); break;
+      case 'selectCell':this._handleCellSelect(parseInt(ds.col), ds.field); break;
+      case 'addCol':    this._handleAddCol(); break;
+      case 'removeCol': this._handleRemoveCol(); break;
+    }
+  }
+
+  _handleNumpad(key) {
+    const { col, field } = this.focusedCell;
+    const state = this.engine.getState();
+    if (col >= state.colCount) return;
+    const current = state.columns[col][field];
+
+    let newVal = current;
+    if (key === 'bk') {
+      newVal = current.slice(0, -1);
+    } else if (key === '.') {
+      // 小数点：已有则忽略，否则追加
+      if (current.includes('.')) return;
+      newVal = current + '.';
+    } else {
+      // 数字键
+      if (current.replace('.','').length >= 10) return;
+      newVal = current + key;
+    }
+    this.engine.setCellValue(col, field, newVal);
+    this.render();
+  }
+
+  _handleCtrl(op) {
+    const { col, field } = this.focusedCell;
+    const state = this.engine.getState();
+
+    switch (op) {
+      case 'reInput':
+        if (col < state.colCount) this.engine.clearCell(col, field);
+        break;
+      case 'clearAll':
+        this.engine.clearAll();
+        this.focusedCell = { col: 0, field: 'quantity' };
+        break;
+      case 'clearSpec':
+        this.engine.clearColumn(col);
+        break;
+    }
+    this.render();
+  }
+
+  _handleCellSelect(col, field) {
+    this.focusedCell = { col, field };
+    this.render();
+  }
+
+  _handleAddCol() {
+    if (this.engine.addColumn()) this.render();
+  }
+
+  _handleRemoveCol() {
+    if (!this.engine.canRemove()) return;
+    this.engine.removeColumn();
+    const maxCol = this.engine.getState().colCount - 1;
+    if (this.focusedCell.col > maxCol) this.focusedCell.col = maxCol;
+    this.render();
+  }
+
+  /* ---------- 渲染 ---------- */
+  render() {
+    const state = this.engine.getState();
+    const grid = this.container.querySelector('#priceGrid');
+    grid.innerHTML = this._buildGridHTML(state);
+    this.container.querySelector('.app-wrapper').style.setProperty('--col-count', state.colCount);
+    const btnAdd = this.container.querySelector('.col-btn.add');
+    const btnRemove = this.container.querySelector('.col-btn.remove');
+    if (btnAdd) btnAdd.style.opacity = this.engine.canAdd() ? '1' : '0.25';
+    if (btnRemove) btnRemove.style.opacity = this.engine.canRemove() ? '1' : '0.25';
+  }
+
+  _buildGridHTML(state) {
+    const { columns, colCount } = state;
+    const fc = this.focusedCell;
+    const labels  = ['规格', '价格', '单价', '选哪个'];
+    const fields  = ['quantity', 'price', null, null];
+    let html = '';
+
+    // Header row: "产品" label + column headers (same height now)
+    html += `<div class="cell-label" style="height:34px;font-size:0.73rem;font-weight:600;color:var(--header-accent);">产品</div>`;
+    for (let i = 0; i < colCount; i++) {
+      html += `<div class="cell-header">规格${i + 1}</div>`;
+    }
+
+    // Data rows
+    for (let row = 0; row < 4; row++) {
+      html += `<div class="cell-label">${labels[row]}</div>`;
+      const field = fields[row];
+
+      for (let ci = 0; ci < colCount; ci++) {
+        const col = columns[ci];
+        const isFocus = (fc.col === ci && fc.field === field);
+        const isCheap = col.isCheapest;
+
+        if (field) {
+          const display = col[field] || '-';
+          const focusCls = isFocus ? ' cell-focused' : '';
+          const cheapCls = (row === 0 || row === 1) && isCheap ? ' cell-cheapest' : '';
+          html += `<button class="cell-data${focusCls}${cheapCls}"
+                        data-action="selectCell" data-col="${ci}" data-field="${field}">${this._esc(display)}</button>`;
+        } else if (row === 2) {
+          let text = '-';
+          if (col.unitPrice !== null && col.unitPrice !== undefined) {
+            text = parseFloat(col.unitPrice.toFixed(4)).toString();
+          }
+          const cheapCls = isCheap ? ' cell-cheapest' : '';
+          html += `<div class="cell-result${cheapCls}">${this._esc(text)}</div>`;
+        } else {
+          let inner;
+          if (isCheap) {
+            inner = '<span class="check-icon">✓</span>';
+          } else if (col.unitPrice !== null) {
+            inner = '—';
+          } else {
+            inner = '?';
+          }
+          const cheapCls = isCheap ? ' cell-cheapest' : '';
+          html += `<div class="cell-choice${cheapCls}">${inner}</div>`;
+        }
+      }
+    }
+
+    return html;
+  }
+
+  _esc(s) {
+    const map = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' };
+    return String(s).replace(/[&<>"']/g, ch => map[ch]);
+  }
+}
+
+/* =================================================================
+   PriceCalcApp — 启动引导
+   ================================================================= */
+class PriceCalcApp {
+  constructor() { this.engine = new PriceCalcEngine(3); }
+  init(selector) {
+    const container = document.querySelector(selector);
+    if (container) new PriceCalcUI(this.engine, container);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  new PriceCalcApp().init('#app-root');
+});
+</script>
+
+</body>
+</html>
