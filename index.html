@@ -2,383 +2,246 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>网络安全关键数据</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ChenTy95</title>
 <style>
-  :root {
-    --surface: #fcfcfb;
-    --page: #f9f9f7;
-    --text-primary: #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted: #898781;
-    --accent: #2a78d6;
-    --accent-subtle: #eaf3fd;
-    --bar-last: #c3c2b7;
-    --bar-track: #e8e7e3;
-    --divider: #e1e0d9;
-  }
+/* ===== CSS Variables (sync with calc) ===== */
+:root {
+  --bg-page: linear-gradient(135deg, #f7f3ed 0%, #eee7dc 40%, #e8dfd3 100%);
+  --card-bg: #fffdf9;
+  --card-shadow: 0 2px 20px rgba(0,0,0,0.06), 0 8px 40px rgba(0,0,0,0.04);
+  --card-hover-shadow: 0 4px 28px rgba(0,0,0,0.1), 0 12px 48px rgba(0,0,0,0.06);
+  --text-primary: #2d2a26;
+  --text-secondary: #7a7368;
+  --text-muted: #b0a89c;
+  --accent: #e8813b;
+  --accent-subtle: #fff2e8;
+  --cell-border: #e6e1d9;
+  --numpad-btn-bg: #f0ece7;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --font-stack: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", system-ui, -apple-system, sans-serif;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
-    background: var(--page);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
+html, body { height: 100%; }
 
-  .dashboard {
-    width: 870px;
-    height: 768px;
-    background: var(--surface);
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    padding: 32px 40px 24px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    overflow: hidden;
-  }
+body {
+  font-family: var(--font-stack);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  /* ---- Header ---- */
-  .header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    flex-shrink: 0;
-  }
-  .header h1 {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 0.02em;
-  }
-  .header .subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-    font-weight: 400;
-  }
+/* ===== Main Card ===== */
+.main-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  padding: 36px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  animation: fadeIn 0.5s ease;
+}
 
-  /* ---- Legend ---- */
-  .legend {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 16px;
-    flex-shrink: 0;
-    font-size: 11px;
-    color: var(--text-secondary);
-  }
-  .legend-swatch {
-    display: inline-block;
-    width: 28px;
-    height: 8px;
-    border-radius: 2px;
-    margin-right: 5px;
-    vertical-align: middle;
-    position: relative;
-    top: -1px;
-  }
-  .legend-swatch.last  { background: var(--bar-last); }
-  .legend-swatch.this  { background: var(--accent); }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  /* ---- Rows ---- */
-  .rows {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+/* ===== Avatar ===== */
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--cell-border);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease;
+}
 
-  .row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--divider);
-  }
-  .row:last-child { border-bottom: none; }
+.avatar:hover {
+  transform: scale(1.05);
+}
 
-  /* ---- Left label ---- */
-  .row-label {
-    width: 134px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .row-icon {
-    font-size: 18px;
-    width: 24px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-  .row-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    line-height: 1.3;
-  }
+/* ===== Name & Intro ===== */
+.name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
 
-  /* ---- Bars area ---- */
-  .bars-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-  }
+.bio {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.6;
+  margin-top: -12px;
+}
 
-  .bar-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 22px;
-  }
+/* ===== Divider ===== */
+.divider {
+  width: 60px;
+  height: 2px;
+  background: var(--cell-border);
+  border-radius: 1px;
+}
 
-  .bar-track {
-    flex: 1;
-    height: 22px;
-    background: var(--bar-track);
-    border-radius: 3px;
-    position: relative;
-    overflow: visible;
-    min-width: 0;
-  }
+/* ===== Card Grid ===== */
+.card-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-  .bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 8px;
-    transition: width 0.3s ease;
-    position: relative;
-    min-width: 0;
-  }
-  .bar-fill.last {
-    background: var(--bar-last);
-    width: 100%; /* 去年全年 = reference 100% */
-  }
-  .bar-fill.this {
-    background: var(--accent);
-  }
+/* ===== Page Link Card ===== */
+.page-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--numpad-btn-bg);
+  border: 1.5px solid var(--cell-border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  .bar-value {
-    font-size: 12px;
-    font-weight: 700;
-    color: #fff;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
-    letter-spacing: -0.01em;
-  }
-  /* For the gray bar, dark text reads better */
-  .bar-fill.last .bar-value {
-    color: var(--text-primary);
-    text-shadow: none;
-  }
+.page-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-hover-shadow);
+  border-color: var(--accent);
+}
 
-  .bar-period-tag {
-    width: 52px;
-    flex-shrink: 0;
-    font-size: 10px;
-    color: var(--text-muted);
-    text-align: right;
-    font-weight: 500;
-  }
+.page-card:active {
+  transform: scale(0.98);
+}
 
-  /* ---- Delta chip ---- */
-  .delta-chip {
-    width: 90px;
-    flex-shrink: 0;
-    text-align: right;
-    font-size: 11px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-  .delta-chip.down { color: #0ca30c; } /* 下降=安全向好=绿色 */
-  .delta-chip.up   { color: #d03b3b; } /* 上升=风险增加=红色 */
-  .delta-chip.warn { color: #eda100; }
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
 
-  /* ---- Summary strip ---- */
-  .summary-strip {
-    flex-shrink: 0;
-    margin-top: 12px;
-    padding: 10px 14px;
-    background: linear-gradient(90deg, #f5f7fa 0%, #eaf3fd 100%);
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 11px;
-    color: var(--text-secondary);
-  }
-  .summary-strip .s-icon { font-size: 16px; }
-  .summary-strip .s-label { font-weight: 700; color: var(--text-primary); margin-right: 4px; }
-  .summary-strip .s-divider { color: var(--divider); margin: 0 4px; }
+.card-icon svg {
+  width: 28px;
+  height: 28px;
+}
 
-  /* ---- Footnote ---- */
-  .footnote {
-    font-size: 10px;
-    color: var(--text-muted);
-    text-align: right;
-    margin-top: 8px;
-    flex-shrink: 0;
-  }
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-arrow {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ===== Footer ===== */
+.footer {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 370px) {
+  .main-card { padding: 28px 16px 22px; gap: 18px; }
+  .avatar { width: 80px; height: 80px; }
+  .name { font-size: 1.2rem; }
+  .page-card { padding: 12px 14px; gap: 10px; }
+  .card-icon { width: 40px; height: 40px; }
+  .card-icon svg { width: 24px; height: 24px; }
+}
 </style>
 </head>
 <body>
 
-<div class="dashboard">
-  <!-- Header -->
-  <div class="header">
-    <h1>网络安全关键数据对比</h1>
-    <span class="subtitle">去年全年 &nbsp;·&nbsp; 今年上半年</span>
+<div class="main-card">
+  <img class="avatar"
+       src="https://avatars.githubusercontent.com/u/29172983?v=4"
+       alt="ChenTy95"
+       loading="eager"
+       onerror="this.style.display='none'">
+
+  <div class="name">ChenTy95</div>
+
+  <div class="bio">搞搞网络，写写代码。</div>
+
+  <div class="divider"></div>
+
+  <div class="card-grid">
+    <!-- 价格比对工具 -->
+    <a class="page-card" href="/calc/">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e8813b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="9" r="2"/>
+          <circle cx="15" cy="15" r="2"/>
+          <line x1="7" y1="12" x2="13" y2="12"/>
+          <line x1="13" y1="7" x2="11" y2="9"/>
+          <line x1="14" y1="14" x2="10" y2="18"/>
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+        </svg>
+      </div>
+      <div class="card-info">
+        <span class="card-title">价格比对工具</span>
+        <span class="card-desc">多规格商品单价对比</span>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- ↓ 后续新页面卡片加在这里 ↓ -->
   </div>
 
-  <!-- Legend -->
-  <div class="legend">
-    <span><span class="legend-swatch last"></span>去年全年（基准）</span>
-    <span><span class="legend-swatch this"></span>今年上半年</span>
-  </div>
-
-  <!-- 5 rows -->
-  <div class="rows">
-
-    <!-- 1: 拦截外部攻击 — 半年占去年 22.3% -->
-    <div class="row">
-      <div class="row-label">
-        <span class="row-icon">🛡️</span>
-        <span class="row-name">拦截外部攻击</span>
-      </div>
-      <div class="bars-area">
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill last"><span class="bar-value">2,612,556 次</span></div>
-          </div>
-          <span class="bar-period-tag">去年全年</span>
-        </div>
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill this" style="width:22.3%"><span class="bar-value">583,014 次</span></div>
-          </div>
-          <span class="bar-period-tag">今年上半年</span>
-        </div>
-      </div>
-      <span class="delta-chip down">↓ 77.7%</span>
-    </div>
-
-    <!-- 2: 处置风险程序 — 半年已超去年 103.6% -->
-    <div class="row">
-      <div class="row-label">
-        <span class="row-icon">🔍</span>
-        <span class="row-name">处置风险程序</span>
-      </div>
-      <div class="bars-area">
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill last"><span class="bar-value">1,238 个</span></div>
-          </div>
-          <span class="bar-period-tag">去年全年</span>
-        </div>
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill this" style="width:100%"><span class="bar-value">1,282 个</span></div>
-          </div>
-          <span class="bar-period-tag">今年上半年</span>
-        </div>
-      </div>
-      <span class="delta-chip up">↑ 3.6%</span>
-    </div>
-
-    <!-- 3: 查杀病毒 — 半年占去年 20.1% -->
-    <div class="row">
-      <div class="row-label">
-        <span class="row-icon">🦠</span>
-        <span class="row-name">查杀病毒</span>
-      </div>
-      <div class="bars-area">
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill last"><span class="bar-value">5,383 个</span></div>
-          </div>
-          <span class="bar-period-tag">去年全年</span>
-        </div>
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill this" style="width:20.1%"><span class="bar-value">1,084 个</span></div>
-          </div>
-          <span class="bar-period-tag">今年上半年</span>
-        </div>
-      </div>
-      <span class="delta-chip down">↓ 79.9%</span>
-    </div>
-
-    <!-- 4: 查杀木马 — 半年已超去年 154.3% -->
-    <div class="row">
-      <div class="row-label">
-        <span class="row-icon">🐴</span>
-        <span class="row-name">查杀木马</span>
-      </div>
-      <div class="bars-area">
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill last"><span class="bar-value">696 个</span></div>
-          </div>
-          <span class="bar-period-tag">去年全年</span>
-        </div>
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill this" style="width:100%"><span class="bar-value">1,074 个</span></div>
-          </div>
-          <span class="bar-period-tag">今年上半年</span>
-        </div>
-      </div>
-      <span class="delta-chip up">↑ 54.3%</span>
-    </div>
-
-    <!-- 5: 拦截垃圾邮件 — 半年占去年 58.9% -->
-    <div class="row">
-      <div class="row-label">
-        <span class="row-icon">📧</span>
-        <span class="row-name">拦截垃圾邮件</span>
-      </div>
-      <div class="bars-area">
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill last"><span class="bar-value">549,987 封</span></div>
-          </div>
-          <span class="bar-period-tag">去年全年</span>
-        </div>
-        <div class="bar-row">
-          <div class="bar-track">
-            <div class="bar-fill this" style="width:58.9%"><span class="bar-value">323,774 封</span></div>
-          </div>
-          <span class="bar-period-tag">今年上半年</span>
-        </div>
-      </div>
-      <span class="delta-chip warn">年化 +17.7%</span>
-    </div>
-
-  </div>
-
-  <!-- Summary strip -->
-  <div class="summary-strip">
-    <span class="s-icon">📊</span>
-    <span class="s-label">上半年态势</span>
-    外部攻击、病毒查杀大幅下降；木马与风险程序半年即超去年全年，需重点关注。
-  </div>
-
-  <!-- Footnote -->
-  <div class="footnote">
-    数据来源：网络安全设备及邮件系统统计 &nbsp;·&nbsp; 统计周期：去年1–12月 / 今年1–6月
-  </div>
+  <div class="footer" id="footer-year"></div>
 </div>
+
+<script>
+document.getElementById('footer-year').textContent =
+  '© ' + new Date().getFullYear() + ' ChenTy95';
+</script>
 
 </body>
 </html>
